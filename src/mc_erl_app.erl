@@ -10,7 +10,10 @@ setup() ->
 ensure_started(App) ->
     case application:start(App) of
         ok -> ok;
-        {error, {already_started, App}} -> ok
+        {error, {already_started, App}} -> ok;
+        {error, {not_started, DepApp}} -> 
+            ensure_started(DepApp),
+            ensure_started(App)
     end.
 
 start(_StartType, _StartArgs) ->
@@ -20,7 +23,10 @@ stop(_State) -> mc_erl_server_sup:shutdown().
 
 %% to be called from OS' command line
 os_setup() ->
-    ok = mnesia:create_schema([node()]),
+    case mnesia:create_schema([node()]) of
+        ok -> ok;
+        {error, {already_exists, _}} -> ok
+    end,
     mnesia:start(),
     {atomic, ok} = setup(),
     mnesia:stop(),
@@ -28,7 +34,8 @@ os_setup() ->
 
 %% to be called from OS' command line
 os_run() ->
-    lager:start(),
+    logger:set_primary_config(level, info),
     ensure_started(mnesia),
-    ensure_started(cutkey),
+    ensure_started(asn1),
+    ensure_started(public_key),
     ok = application:start(mc_erl).

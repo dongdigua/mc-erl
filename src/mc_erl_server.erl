@@ -9,7 +9,7 @@
 
 -record(state, {listen, public_key, private_key}).
 
--include_lib("public_key/include/OTP-PUB-KEY.hrl").
+-include_lib("public_key/include/public_key.hrl").
 
 
 % gen_server callbacks
@@ -25,11 +25,11 @@ stop() ->
 % gen_server callbacks
 init([]) ->
     process_flag(trap_exit, true),
-    lager:info("[~s] starting~n", [?MODULE]),
+    logger:info("[~s] starting~n", [?MODULE]),
     %PublicKey = read_public_key("key.pub"),
     %PrivateKey = read_private_key("key"),
 
-    {ok, PrivateKey} = cutkey:rsa(1024, 65537, [{return, key}]),
+    PrivateKey = public_key:generate_key({rsa, 1024, 65537}),
     #'RSAPrivateKey'{modulus=Modulus, publicExponent=PublicExponent} = PrivateKey,
     {'SubjectPublicKeyInfo', PublicKey, not_encrypted} = public_key:pem_entry_encode('SubjectPublicKeyInfo', #'RSAPublicKey'{modulus=Modulus, publicExponent=PublicExponent}),
 
@@ -41,7 +41,7 @@ init([]) ->
     {ok, #state{listen=Listen, public_key=PublicKey, private_key=PrivateKey}}.
 
 acceptor(Listen) ->
-    lager:debug("[~s:acceptor] awaiting connection...~n", [?MODULE]),
+    logger:debug("[~s:acceptor] awaiting connection...~n", [?MODULE]),
     case gen_tcp:accept(Listen) of
         {ok, Socket} ->
             gen_server:cast(?MODULE, {new_connection, Socket}),
@@ -57,7 +57,7 @@ ticker(Time) ->
     ticker(Time+1).
 
 handle_call(Message, _From, State) ->
-    lager:notice("[~s] received call: ~p~n", [?MODULE, Message]),
+    logger:notice("[~s] received call: ~p~n", [?MODULE, Message]),
     {noreply, State}.
 
 handle_cast({new_connection, Socket}, State) ->
@@ -71,19 +71,19 @@ handle_cast({tick, Time}=Tick, State) when is_integer(Time) ->
     {noreply, State};
 
 handle_cast(stop, State) ->
-    lager:info("[~s] stopping~n", [?MODULE]),
+    logger:info("[~s] stopping~n", [?MODULE]),
     {stop, normal, State};
 
 handle_cast(Message, State) ->
-    lager:notice("[~s] received cast: ~p~n", [?MODULE, Message]),
+    logger:notice("[~s] received cast: ~p~n", [?MODULE, Message]),
     {noreply, State}.
 
 handle_info(Message, State) ->
-    lager:notice("[~s] received info: ~p~n", [?MODULE, Message]),
+    logger:notice("[~s] received info: ~p~n", [?MODULE, Message]),
     {noreply, State}.
 
 terminate(Reason, _State) ->
-    lager:notice("[~s] terminated with Reason=~p~n", [?MODULE, Reason]),
+    logger:notice("[~s] terminated with Reason=~p~n", [?MODULE, Reason]),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->

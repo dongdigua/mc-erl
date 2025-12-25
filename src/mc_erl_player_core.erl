@@ -20,7 +20,7 @@ init_player(Socket, PublicKey, PrivateKey) when is_record(PrivateKey, 'RSAPrivat
             gen_tcp:close(Socket);
 
         {handshake, [51, Name, _Host, _Port]} ->
-            lager:notice("[~s] Player joining: ~s~n", [?MODULE, Name]),
+            logger:notice("[~s] Player joining: ~s", [?MODULE, Name]),
 
             % generate token
             Token = crypto:strong_rand_bytes(4),
@@ -62,7 +62,7 @@ decoder(Reader, Logic) when is_pid(Logic) ->
             mc_erl_player_logic:packet(Logic, {packet, Packet}),
             decoder(Reader, Logic);
         {error, closed} ->
-            lager:warning("[~s] socket is closed~n", [?MODULE]),
+            logger:warning("[~s] socket is closed", [?MODULE]),
             mc_erl_player_logic:packet(Logic, net_disconnect)
     end.
 

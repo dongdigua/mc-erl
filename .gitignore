@@ -14,3 +14,5 @@ ebin/*
 deps/*
 Mnesia.*
 .eunit/*
+_build/*
+rebar.lock

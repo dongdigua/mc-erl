@@ -7,7 +7,7 @@
 -include("records.hrl").
 
 gen_column({X, Y}) ->
-    lager:notice("[~w] generated chunk ~p~n", [?MODULE, {chunk, X, Y}]),
+    logger:notice("[~w] generated chunk ~p", [?MODULE, {chunk, X, Y}]),
     EmptyChunk = #chunk_data{types=binary:copy(<<0>>,16*16*16),
                              metadata=binary:copy(<<0>>,16*16*8),
                              block_light=binary:copy(<<255>>,16*16*8),

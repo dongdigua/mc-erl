@@ -2,6 +2,7 @@
 
 -module(mc_erl_chunk_manager).
 -behaviour(gen_server).
+-compile({no_auto_import,[floor/1]}).
 
 -export([setup/0, start_link/0, stop/0, clear_map/0, reset_chunk/1, coord_to_chunk/1, chunks_in_range/2, get_chunk/1,
          set_block/2, set_block/3, get_block/1, loaded_chunks/0, undirectional_block_coord/1, tick/1]).
@@ -183,7 +184,7 @@ write_column(Coord, ColumnData) ->
 
 % gen_server callbacks
 init([]) ->
-    lager:info("[~s] starting~n", [?MODULE]),
+    logger:info("[~s] starting", [?MODULE]),
     {ok, void}.
 
 handle_call(loaded_chunks, _From, Chunks) ->
@@ -192,7 +193,7 @@ handle_call(loaded_chunks, _From, Chunks) ->
 handle_call(Message, _From, State) ->
     case Message of
         _ ->
-            lager:notice("[~s] received call: ~p~n", [?MODULE, Message]),
+            logger:notice("[~s] received call: ~p", [?MODULE, Message]),
             {noreply, State}
     end.
 
@@ -241,17 +242,17 @@ handle_cast({tick, _Time}, Chunks) ->
     {noreply, Chunks};
 
 handle_cast(stop, State) ->
-    lager:info("[~s] stopping~n", [?MODULE]),
+    logger:info("[~s] stopping", [?MODULE]),
     {stop, normal, State};
 
 handle_cast(Message, State) ->
-    lager:notice("[~s] received cast: ~p~n", [?MODULE, Message]),
+    logger:notice("[~s] received cast: ~p", [?MODULE, Message]),
     {noreply, State}.
 
 handle_info(Message, State) ->
     case Message of
         _ ->
-            lager:notice("[~s] received info: ~p~n", [?MODULE, Message]),
+            logger:notice("[~s] received info: ~p", [?MODULE, Message]),
             {noreply, State}
     end.
 

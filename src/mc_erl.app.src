@@ -4,9 +4,9 @@
     [
         {mod, {mc_erl_app, []}},
         {description, "minecraft server"},
-        {vsn, "1"},
-        %{modules, []}, % added by rebar
+        {vsn, git},
         {registered, []},
-        {applications, [kernel, stdlib, lager, mnesia, cutkey]}
+        {applications, [kernel, stdlib, mnesia, asn1, public_key]},
+        {env, []}
     ]
 }.

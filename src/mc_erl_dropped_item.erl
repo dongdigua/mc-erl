@@ -1,6 +1,7 @@
 %% @copyright 2012 Gregory Fefelov, Feiko Nanninga
 
 -module(mc_erl_dropped_item).
+-compile({no_auto_import,[floor/1]}).
 
 -export([new/2, spawn/3]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -46,14 +47,14 @@ handle_info(suicide, State) ->
     {stop, normal, State};
 
 handle_info(Info, State) ->
-    lager:notice("[~s] got unknown info: ~p~n", [?MODULE, Info]),
+    logger:notice("[~s] got unknown info: ~p~n", [?MODULE, Info]),
     {noreply, State}.
 
 handle_call(get_state, _From, State) ->
     {reply, State, State};
 
 handle_call(Req, _From, State) ->
-    lager:notice("[~s] got unknown call: ~p~n", [?MODULE, Req]),
+    logger:notice("[~s] got unknown call: ~p~n", [?MODULE, Req]),
     {noreply, State}.
 
 handle_cast(Req, State) ->
@@ -126,7 +127,7 @@ handle_cast(Req, State) ->
 
 pick_up_check(Entity, State) when Entity#entity.type =:= player ->
     case in_range(Entity#entity.location, State) of
-        true -> lager:notice("~p: player in range!~n", [State#state.entity#entity.eid]);
+        true -> logger:notice("~p: player in range!~n", [State#state.entity#entity.eid]);
         false -> ok
     end,
     State;

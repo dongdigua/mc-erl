@@ -26,12 +26,12 @@ reload() ->
 
 % gen server stuff
 init([]) ->
-    lager:info("[~s] starting~n", [?MODULE]),
+    logger:info("[~s] starting", [?MODULE]),
     Entries = ets:new(void, [set, private]),
     try
         load_file(Entries, ?CONFIG_FILE)
     catch
-        error:_ -> lager:critical("[~s] can't access server.conf~n", [?MODULE])
+        error:_ -> logger:critical("[~s] can't access server.conf", [?MODULE])
     end,
     {ok, Entries}.
 
@@ -44,7 +44,7 @@ handle_call({get, Key, Default}, _From, Entries) ->
 handle_call(Message, _From, State) ->
     case Message of
         _ ->
-            lager:notice("[~s] received call: ~p~n", [?MODULE, Message]),
+            logger:notice("[~s] received call: ~p", [?MODULE, Message]),
             {noreply, State}
     end.
 
@@ -53,13 +53,13 @@ handle_cast(reload, Entries) ->
     {noreply, Entries};
 
 handle_cast(Message, State) ->
-    lager:notice("[~s] received cast: ~p~n", [?MODULE, Message]),
+    logger:notice("[~s] received cast: ~p", [?MODULE, Message]),
     {noreply, State}.
 
 handle_info(Message, State) ->
     case Message of
         _ ->
-            lager:notice("[~s] received info: ~p~n", [?MODULE, Message]),
+            logger:notice("[~s] received info: ~p", [?MODULE, Message]),
             {noreply, State}
     end.
 

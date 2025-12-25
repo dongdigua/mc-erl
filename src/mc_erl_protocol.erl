@@ -31,7 +31,7 @@ decrypt(Socket, Key, IVec, BytesCount, Return) ->
         {ok, <<Bin>>=B} ->
             %mc_erl_protocol:print_hex(Bin),
             Cipher = <<Bin, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0>>,
-            Text = crypto:block_decrypt(aes_cfb128, Key, IVec, Cipher),
+            Text = crypto:crypto_one_time(aes_cfb128, Key, IVec, Cipher, false),
 
             %mc_erl_protocol:print_hex(Text),
 
@@ -45,8 +45,8 @@ encrypt(Socket, Key, IVec, Text) when is_binary(Text) ->
 encrypt(_, _, IVec, [], Return) ->
     {lists:reverse(Return), IVec};
 encrypt(Socket, Key, IVec, [Text|Rest], Return) ->
-    Cipher = crypto:block_encrypt(aes_cfb128, Key, IVec,
-                                  <<Text, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0>>),
+    Cipher = crypto:crypto_one_time(aes_cfb128, Key, IVec,
+                                  <<Text, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0>>, true),
     <<Ret:1/binary, _/binary>> = Cipher,
     encrypt(Socket, Key, gen_ivec(IVec, Ret), Rest, [Ret|Return]).
 
@@ -102,7 +102,7 @@ read_value(Reader, Type) ->
         projectile_data -> read_projectile_data(Reader);
         {array, CountType, PayloadType} -> read_array(Reader, CountType, PayloadType);
         _ ->
-            lager:emergency("[~w] unknown datatype: ~p~n", [?MODULE, Type]),
+            logger:error("[~w] unknown datatype: ~p~n", [?MODULE, Type]),
             {error, unknown_datatype, Type}
     end.
 
@@ -329,7 +329,7 @@ encode_packet({Name, ParamList}) ->
                     R = list_to_binary([Id, Bin]),
                     R;
                 {error, not_enough_arguments, OutputSoFar} ->
-                    lager:emergency("[~s] Error encoding ~p: not enough arguments!~nOutput so far: ~p~n", [?MODULE, Name, OutputSoFar]),
+                    logger:error("[~s] Error encoding ~p: not enough arguments!~nOutput so far: ~p~n", [?MODULE, Name, OutputSoFar]),
                     {error, not_enough_arguments}
             end
     end.
