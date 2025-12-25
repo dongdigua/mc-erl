@@ -3,14 +3,14 @@ You'll need an Erlang compiler/vm! If you are on Linux, you can install Erlang u
 
     sudo apt-get install erlang
 
-You will also need make and rebar, the commonly used Erlang build tool.
+You will also need rebar3, the commonly used Erlang build tool.
 
 ## Setup
 
 As we use an Mnesia database for storing data permanently, it has to be set up first. Always keep in mind that the table definitions can change on updates, introducing incompabilities.
 
 1. Download (uncompress if necessary) (or use _git clone_)
-2. $ make
+2. $ rebar3 compile
 3. $ ./setup.sh
 
 ### Starting:
